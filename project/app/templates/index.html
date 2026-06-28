@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Top Anime</title>
+    <style>
+      .anime-card {
+        border: 1px solid #ddd;
+        margin: 20px;
+        padding: 15px;
+        display: inline-block;
+        width: 300px;
+      }
+      .anime-card img {
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Top Animes</h1>
+
+    {% for title, synopsis, image, year in mylist %}
+    <div class="anime-card">
+      <img src="{{ image }}" alt="{{ title }}" />
+      <h2>{{ title }}</h2>
+      <p><strong>Año:</strong> {{ year }}</p>
+      <p>{{ synopsis|truncatechars:150 }}</p>
+    </div>
+    {% endfor %} {% for anime in anime_list %}
+    <div class="anime-card">
+      <img src="{{ anime.image }}" alt="{{ anime.title }}" />
+      <h2>{{ anime.title }}</h2>
+      <p><strong>Año:</strong> {{ anime.year }}</p>
+      <p><strong>Puntuación:</strong> {{ anime.score }}</p>
+      <p><strong>Episodios:</strong> {{ anime.episodes }}</p>
+      <p>{{ anime.synopsis|truncatechars:150 }}</p>
+    </div>
+    {% empty %}
+    <p>No hay animes disponibles</p>
+    {% endfor %}
+  </body>
+</html>

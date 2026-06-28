@@ -1,42 +1,228 @@
 <!doctype html>
-<html>
+<html lang="es">
   <head>
-    <title>Top Anime</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Top Anime - MyAnimeList</title>
+    <!-- Bulma CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    />
+    <!-- Font Awesome para iconos (opcional) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
     <style>
+      /* Estilos personalizados adicionales */
       .anime-card {
-        border: 1px solid #ddd;
-        margin: 20px;
-        padding: 15px;
-        display: inline-block;
-        width: 300px;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        height: 100%;
       }
-      .anime-card img {
-        max-width: 100%;
-        height: auto;
+      .anime-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+      .anime-card .card-image {
+        position: relative;
+        overflow: hidden;
+      }
+      .anime-card .card-image img {
+        height: 350px;
+        object-fit: cover;
+      }
+      .anime-score {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #ffd700;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+      .anime-score i {
+        margin-right: 4px;
+      }
+      .synopsis-text {
+        max-height: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+      .hero-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
       }
     </style>
   </head>
   <body>
-    <h1>Top Animes</h1>
+    <!-- Hero / Banner -->
+    <section class="hero hero-gradient is-medium">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <h1 class="title is-1 has-text-white">
+            <i class="fas fa-film"></i> Top Anime
+          </h1>
+          <p class="subtitle has-text-white">
+            Los mejores animes según MyAnimeList {% if total_results %}
+            <span class="tag is-light is-medium ml-3">
+              <i class="fas fa-list"></i> {{ total_results }} resultados
+            </span>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </section>
 
-    {% for title, synopsis, image, year in mylist %}
-    <div class="anime-card">
-      <img src="{{ image }}" alt="{{ title }}" />
-      <h2>{{ title }}</h2>
-      <p><strong>Año:</strong> {{ year }}</p>
-      <p>{{ synopsis|truncatechars:150 }}</p>
-    </div>
-    {% endfor %} {% for anime in anime_list %}
-    <div class="anime-card">
-      <img src="{{ anime.image }}" alt="{{ anime.title }}" />
-      <h2>{{ anime.title }}</h2>
-      <p><strong>Año:</strong> {{ anime.year }}</p>
-      <p><strong>Puntuación:</strong> {{ anime.score }}</p>
-      <p><strong>Episodios:</strong> {{ anime.episodes }}</p>
-      <p>{{ anime.synopsis|truncatechars:150 }}</p>
-    </div>
-    {% empty %}
-    <p>No hay animes disponibles</p>
-    {% endfor %}
+    <!-- Contenido principal -->
+    <section class="section">
+      <div class="container">
+        <!-- Mostrar error si existe -->
+        {% if error %}
+        <div class="notification is-danger is-light">
+          <button class="delete"></button>
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Grid de animes -->
+        <div class="columns is-multiline is-desktop">
+          {% for anime in anime_list %}
+          <div class="column is-3-desktop is-4-tablet is-6-mobile">
+            <div class="card anime-card">
+              <div class="card-image">
+                <figure class="image is-4by3">
+                  <img
+                    src="{{ anime.image }}"
+                    alt="{{ anime.title }}"
+                    loading="lazy"
+                  />
+                </figure>
+                <!-- Badge de puntuación -->
+                <div class="anime-score">
+                  <i class="fas fa-star"></i> {{ anime.score }}
+                </div>
+              </div>
+
+              <div class="card-content">
+                <div class="media">
+                  <div class="media-content">
+                    <p class="title is-6 has-text-weight-bold">
+                      {{ anime.title|truncatechars:35 }}
+                    </p>
+                    <div class="tags">
+                      <span class="tag is-info is-light">
+                        <i class="fas fa-calendar"></i> {{ anime.year }}
+                      </span>
+                      <span class="tag is-success is-light">
+                        <i class="fas fa-play-circle"></i> {{ anime.type }}
+                      </span>
+                      <span class="tag is-warning is-light">
+                        <i class="fas fa-video"></i> {{ anime.episodes }} eps
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="content">
+                  <p class="synopsis-text has-text-grey-dark is-size-7">
+                    {{ anime.synopsis|truncatechars:150 }}
+                  </p>
+                </div>
+
+                <!-- Botón de acción -->
+                <div class="buttons is-centered mt-3">
+                  <a
+                    href="https://myanimelist.net/anime/{{ anime.mal_id }}"
+                    target="_blank"
+                    class="button is-small is-primary is-outlined"
+                  >
+                    <i class="fas fa-external-link-alt"></i> Ver más
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="column is-full">
+            <div class="notification is-warning is-light">
+              <i class="fas fa-info-circle"></i>
+              No se encontraron animes disponibles
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Paginación (ejemplo visual) -->
+        {% if anime_list %}
+        <nav
+          class="pagination is-centered mt-6"
+          role="navigation"
+          aria-label="pagination"
+        >
+          <a class="pagination-previous" disabled>
+            <i class="fas fa-chevron-left"></i> Anterior
+          </a>
+          <a class="pagination-next">
+            Siguiente <i class="fas fa-chevron-right"></i>
+          </a>
+          <ul class="pagination-list">
+            <li>
+              <a class="pagination-link is-current" aria-label="Page 1">1</a>
+            </li>
+            <li><a class="pagination-link" aria-label="Page 2">2</a></li>
+            <li><a class="pagination-link" aria-label="Page 3">3</a></li>
+            <li><span class="pagination-ellipsis">&hellip;</span></li>
+            <li><a class="pagination-link" aria-label="Page 5">5</a></li>
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer has-background-light">
+      <div class="content has-text-centered">
+        <p>
+          <strong>Anime Explorer</strong> con
+          <i class="fas fa-heart has-text-danger"></i> y
+          <a href="https://bulma.io" target="_blank">Bulma</a> | Datos de
+          <a href="https://myanimelist.net" target="_blank">MyAnimeList</a>
+          <br />
+          <span class="is-size-7 has-text-grey">
+            <i class="fas fa-code"></i> Django + Requests
+          </span>
+        </p>
+      </div>
+    </footer>
+
+    <!-- Bulma JavaScript (opcional, para el botón delete) -->
+    <script>
+      // Cerrar notificaciones
+      document.addEventListener("DOMContentLoaded", function () {
+        (document.querySelectorAll(".notification .delete") || []).forEach(
+          ($delete) => {
+            const $notification = $delete.parentNode;
+            $delete.addEventListener("click", () => {
+              $notification.parentNode.removeChild($notification);
+            });
+          },
+        );
+      });
+    </script>
   </body>
 </html>
